@@ -27,8 +27,13 @@ dist/
 # Logs & Databases
 *.log
 *.sqlite3
+news_summarizer.db
 
 # Testing & Coverage
 .pytest_cache/
 .coverage
 htmlcov/
+
+# User-specific documentation & internal specs to exclude
+news_summarizer_saas_functional_specification.md
+GEMINI.md
