@@ -35,14 +35,16 @@ news-summarizer/
 │   │   └── schemas.py        # Pydantic v2 데이터 입출력 검증 스키마
 │   └── services/             # 비즈니스 로직 및 ETL 엔진
 │       ├── __init__.py
-│       ├── scraper.py        # RSS 피드 수집 및 OpenGraph 썸네일 파서
+│       ├── scraper.py        # RSS 피드 수집, OpenGraph 썸네일 파서 및 RSS 요약 추출
 │       ├── cleaner.py        # Trafilatura 본문 추출 및 보일러플레이트 정제기
 │       ├── deduplicator.py   # URL 정규화 및 SHA-256 해시 중복 방지기
 │       ├── clusterer.py      # N-gram Jaccard 유사도 기반 기사 군집화 엔진
-│       ├── pipeline.py       # 수집-정제-중복방지-군집화 전체 ETL 오케스트레이터
+│       ├── ai_summarizer.py  # Google Gemini API 기반 구조화된 3줄 요약 및 태깅 엔진
+│       ├── pipeline.py       # 수집-정제-중복방지-AI가공-군집화 전체 ETL 오케스트레이터
 │       └── scheduler.py      # APScheduler 기반 주기적 백그라운드 수집 스케줄러
 └── tests/                    # 자동화 테스트
-    └── test_ingestion.py     # ETL 핵심 로직 단위 테스트
+    ├── test_ingestion.py     # ETL 핵심 로직 단위 테스트
+    └── test_ai_summarizer.py # AI 요약 서비스 폴백 및 검증 테스트
 ```
 
 ---
@@ -61,7 +63,7 @@ news-summarizer/
 * **`app/models/entities.py`**:
   - **`FeedSource`**: RSS 소스 정보(언론사명, RSS URL, 카테고리, 활성화 여부, 마지막 수집 시간)를 관리하는 ORM 테이블.
   - **`TopicCluster`**: 동일 사건/이슈로 묶인 기사 그룹과 대표 기사(`primary_article_id`)를 관리하는 ORM 테이블.
-  - **`Article`**: 수집된 개별 기사 데이터(원문 URL, 정규화 URL, SHA-256 해시, 제목, 언론사, 본문 텍스트/HTML, 썸네일, 발행일)를 저장하는 ORM 테이블.
+  - **`Article`**: 수집된 개별 기사 데이터(원문 URL, 정규화 URL, SHA-256 해시, 제목, 언론사, 본문 텍스트/HTML, 썸네일, 발행일, AI 요약/태그/핵심 메시지)를 저장하는 ORM 테이블.
 * **`app/models/schemas.py`**:
   - API 요청 및 응답 데이터 검증을 위한 Pydantic v2 모델(`FeedSourceCreate`, `ArticleResponse`, `ArticleDetailResponse`, `TopicClusterResponse`, `IngestionResultResponse` 등)을 정의합니다.
 
@@ -78,8 +80,10 @@ news-summarizer/
 * **`app/services/clusterer.py`**:
   - 제목 및 본문 앞단을 토큰화하여 N-gram Jaccard 유사도($\ge 0.85$)를 계산합니다.
   - 최근 24시간 내 기사들과 비교하여 동일 이슈일 경우 기존 `TopicCluster`에 편입하고, 가장 정보량이 많은 기사를 대표 기사(`Primary Article`)로 선정합니다.
+* **`app/services/ai_summarizer.py`**:
+  - Google Gemini API (`google-genai`)를 활용하여 기사 본문과 제목으로부터 3줄 요약, 태그 목록, 한 줄 핵심을 엄격한 JSON Schema 규격으로 추출 및 캐싱합니다.
 * **`app/services/pipeline.py`**:
-  - 수집 ➔ 정규화 ➔ 해시 중복방지 ➔ 본문추출 ➔ 정제 ➔ 길이검증 ➔ DB저장 ➔ 군집화 단계를 순차적으로 실행하는 전체 ETL 오케스트레이터입니다.
+  - 수집 ➔ 정규화 ➔ 해시 중복방지 ➔ 웹페이지 수집(또는 RSS 요약 Fallback) ➔ 본문추출 ➔ 정제 ➔ 길이검증 ➔ AI 요약/태깅 ➔ DB저장 ➔ 군집화 단계를 순차적으로 실행하는 전체 ETL 오케스트레이터입니다.
 * **`app/services/scheduler.py`**:
   - `APScheduler`를 활용해 설정된 주기(기본 15분)마다 백그라운드에서 모든 활성 피드 소스의 수집 파이프라인을 자동 실행합니다.
 
