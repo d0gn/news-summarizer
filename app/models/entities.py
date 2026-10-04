@@ -78,6 +78,13 @@ class Article(Base):
     published_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
     is_primary: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    
+    # AI Processing & Intelligence Fields (AI 가공 결과 캐싱용 필드)
+    summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True, comment="3줄 요약 결과")
+    tags: Mapped[Optional[str]] = mapped_column(Text, nullable=True, comment="태그 목록 (쉼표 구분 또는 JSON 배열)")
+    core_message: Mapped[Optional[str]] = mapped_column(String(300), nullable=True, comment="한 줄 핵심 메시지")
+    is_processed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, comment="AI 가공 완료 여부 플래그")
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, nullable=False
     )

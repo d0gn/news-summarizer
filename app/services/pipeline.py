@@ -14,6 +14,8 @@ from app.services.deduplicator import (
     normalize_url,
 )
 from app.services.scraper import fetch_article_webpage, fetch_rss_feed
+from app.services.ai_summarizer import ai_summarizer_service
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -28,12 +30,16 @@ async def run_pipeline_for_source(db: AsyncSession, source: FeedSource) -> Inges
     feed_entries = await fetch_rss_feed(source.url)
     summary.total_feed_items = len(feed_entries)
 
+    # Limit feed entries processed per run according to settings
+    feed_entries = feed_entries[:settings.MAX_ITEMS_PER_FEED]
+
     for entry in feed_entries:
         try:
             raw_url = entry["link"]
             title = entry["title"]
             rss_thumbnail = entry.get("thumbnail_url")
             published_at = entry.get("published_at")
+            rss_summary = entry.get("summary", "")
 
             # 1. Strict Deduplication (URL normalization + hash check)
             norm_url = normalize_url(raw_url)
@@ -48,6 +54,12 @@ async def run_pipeline_for_source(db: AsyncSession, source: FeedSource) -> Inges
 
             # 2. Fetch article webpage content & fallback OpenGraph thumbnail
             html_content, og_thumbnail = await fetch_article_webpage(raw_url)
+            
+            # Fallback to RSS summary if webpage fetch failed (e.g. 403 Forbidden / Anti-bot block)
+            if not html_content and rss_summary:
+                html_content = rss_summary
+                logger.info(f"Using RSS summary fallback for blocked/failed URL: {raw_url}")
+
             if not html_content:
                 summary.errors += 1
                 continue
@@ -62,7 +74,10 @@ async def run_pipeline_for_source(db: AsyncSession, source: FeedSource) -> Inges
 
             thumbnail_url = rss_thumbnail or og_thumbnail
 
-            # 5. Create Article entity
+            # 5. AI Processing & Summarization (Gemini API)
+            ai_result = await ai_summarizer_service.summarize_article(title, clean_text)
+
+            # 6. Create Article entity
             article = Article(
                 source_id=source.id,
                 origin_url=raw_url,
@@ -75,11 +90,15 @@ async def run_pipeline_for_source(db: AsyncSession, source: FeedSource) -> Inges
                 thumbnail_url=thumbnail_url,
                 published_at=published_at or datetime.utcnow(),
                 is_primary=False,
+                summary=ai_result.get("summary"),
+                tags=ai_result.get("tags"),
+                core_message=ai_result.get("core_message"),
+                is_processed=True,
             )
             db.add(article)
             await db.flush()
 
-            # 6. Topic Clustering & Primary Article Assignment
+            # 7. Topic Clustering & Primary Article Assignment
             await assign_article_to_cluster(db, article)
 
             summary.new_articles_saved += 1

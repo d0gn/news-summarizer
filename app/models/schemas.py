@@ -38,6 +38,10 @@ class ArticleBase(BaseModel):
     thumbnail_url: Optional[str] = None
     published_at: Optional[datetime] = None
     is_primary: bool = False
+    summary: Optional[str] = Field(None, description="3줄 요약")
+    tags: Optional[str] = Field(None, description="태그 목록")
+    core_message: Optional[str] = Field(None, description="한 줄 핵심")
+    is_processed: bool = Field(default=False, description="AI 가공 완료 여부")
 
 
 class RelatedArticleItem(BaseModel):

@@ -65,11 +65,15 @@ async def fetch_rss_feed(source_url: str) -> List[dict]:
                         thumbnail_url = enc.get("href")
                         break
 
+            # Extract summary or description from RSS entry as fallback content
+            summary = getattr(entry, "summary", "") or getattr(entry, "description", "")
+
             entries.append({
                 "link": link.strip(),
                 "title": title.strip(),
                 "published_at": published_at,
                 "thumbnail_url": thumbnail_url,
+                "summary": summary.strip(),
             })
 
         return entries
@@ -80,7 +84,11 @@ async def fetch_rss_feed(source_url: str) -> List[dict]:
 
 async def fetch_article_webpage(url: str) -> Tuple[Optional[str], Optional[str]]:
     """Fetches article webpage HTML and extracts OpenGraph thumbnail if missing from RSS."""
-    headers = {"User-Agent": settings.INGESTION_USER_AGENT}
+    headers = {
+        "User-Agent": settings.INGESTION_USER_AGENT,
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+    }
     try:
         async with httpx.AsyncClient(timeout=settings.INGESTION_REQUEST_TIMEOUT_SECONDS, follow_redirects=True) as client:
             response = await client.get(url, headers=headers)
