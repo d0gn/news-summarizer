@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.orm import DeclarativeBase
 
 from app.core.config import settings
+# import app.models  # noqa: F401
 
 # Engine configuration
 engine: AsyncEngine = create_async_engine(

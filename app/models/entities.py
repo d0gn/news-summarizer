@@ -95,6 +95,67 @@ class Article(Base):
     cluster: Mapped[Optional[TopicCluster]] = relationship(
         "TopicCluster", back_populates="articles", foreign_keys=[cluster_id]
     )
+    bookmarks: Mapped[List["UserBookmark"]] = relationship(
+        "UserBookmark", back_populates="article", cascade="all, delete-orphan"
+    )
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
+    hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
+    full_name: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    tier: Mapped[str] = mapped_column(String(50), nullable=False, default="free")  # free, pro, team
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
+
+    bookmarks: Mapped[List["UserBookmark"]] = relationship(
+        "UserBookmark", back_populates="user", cascade="all, delete-orphan"
+    )
+    preference: Mapped[Optional["UserPreference"]] = relationship(
+        "UserPreference", back_populates="user", uselist=False, cascade="all, delete-orphan"
+    )
+
+
+class UserBookmark(Base):
+    __tablename__ = "user_bookmarks"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    article_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("articles.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, nullable=False
+    )
+
+    user: Mapped["User"] = relationship("User", back_populates="bookmarks")
+    article: Mapped["Article"] = relationship("Article", back_populates="bookmarks")
+
+
+class UserPreference(Base):
+    __tablename__ = "user_preferences"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=False, index=True
+    )
+    preferred_categories: Mapped[Optional[str]] = mapped_column(Text, nullable=True, comment="쉼표로 구분된 선호 카테고리")
+    preferred_keywords: Mapped[Optional[str]] = mapped_column(Text, nullable=True, comment="쉼표로 구분된 선호 키워드/태그")
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
+
+    user: Mapped["User"] = relationship("User", back_populates="preference")
 
 
 __table_args__ = (

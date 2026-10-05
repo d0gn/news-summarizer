@@ -97,3 +97,59 @@ class IngestionResultResponse(BaseModel):
     total_duplicates: int
     total_skipped: int
     details: List[IngestionSummary]
+
+
+# User & Auth Schemas
+class UserCreate(BaseModel):
+    email: str = Field(..., description="사용자 이메일")
+    password: str = Field(..., min_length=6, description="비밀번호 (최소 6자)")
+    full_name: Optional[str] = Field(None, max_length=100, description="사용자 이름")
+
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+
+class UserResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    email: str
+    full_name: Optional[str] = None
+    tier: str = "free"
+    is_active: bool = True
+    created_at: datetime
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+
+
+# Bookmark & Preference Schemas
+class BookmarkCreate(BaseModel):
+    article_id: int = Field(..., description="북마크할 기사 ID")
+
+
+class BookmarkResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    article_id: int
+    created_at: datetime
+    article: ArticleResponse
+
+
+class UserPreferenceUpdate(BaseModel):
+    preferred_categories: Optional[str] = Field(None, description="쉼표로 구분된 선호 카테고리 (예: IT,경제)")
+    preferred_keywords: Optional[str] = Field(None, description="쉼표로 구분된 선호 키워드 (예: 인공지능,반도체)")
+
+
+class UserPreferenceResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    user_id: int
+    preferred_categories: Optional[str] = None
+    preferred_keywords: Optional[str] = None
+    updated_at: datetime

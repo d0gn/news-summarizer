@@ -1,4 +1,11 @@
-from app.models.entities import Article, FeedSource, TopicCluster
+from app.models.entities import (
+    Article,
+    FeedSource,
+    TopicCluster,
+    User,
+    UserBookmark,
+    UserPreference,
+)
 from app.models.schemas import (
     ArticleDetailResponse,
     ArticleResponse,
@@ -15,6 +22,9 @@ __all__ = [
     "FeedSource",
     "TopicCluster",
     "Article",
+    "User",
+    "UserBookmark",
+    "UserPreference",
     "FeedSourceCreate",
     "FeedSourceUpdate",
     "FeedSourceResponse",
