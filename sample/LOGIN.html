@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PulseFeed - 로그인</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#F5F3FF',
+              100: '#EDE9FE',
+              500: '#8B5CF6',
+              600: '#7C3AED',
+              700: '#6D28D9',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- React & ReactDOM CDN -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-[#0B0F19] dark:text-slate-100 antialiased selection:bg-purple-500 selection:text-white transition-colors duration-200 min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+  <div id="root" class="w-full flex justify-center"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    // --- 아이콘 컴포넌트 ---
+    const Icon = ({ name, className = "w-4 h-4" }) => {
+      const icons = {
+        sparkles: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />,
+        mail: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />,
+        lock: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />,
+        eye: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />,
+        eyeOff: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />,
+        sun: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />,
+        moon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />,
+        arrowRight: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />,
+        check: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+      };
+      return (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          {icons[name] || null}
+        </svg>
+      );
+    };
+
+    function LoginForm() {
+      const [formData, setFormData] = useState({
+        email: '',
+        password: '',
+        rememberMe: true
+      });
+      const [showPassword, setShowPassword] = useState(false);
+      const [isLoading, setIsLoading] = useState(false);
+      const [loginSuccess, setLoginSuccess] = useState(false);
+      const [darkMode, setDarkMode] = useState(false);
+
+      // 다크모드 제어
+      const toggleDarkMode = () => {
+        setDarkMode(!darkMode);
+        if (!darkMode) document.documentElement.classList.add('dark');
+        else document.documentElement.classList.remove('dark');
+      };
+
+      const handleChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setFormData(prev => ({
+          ...prev,
+          [name]: type === 'checkbox' ? checked : value
+        }));
+      };
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!formData.email || !formData.password || isLoading) return;
+
+        setIsLoading(true);
+
+        // JWT 로그인 인증 시뮬레이션
+        setTimeout(() => {
+          setIsLoading(false);
+          setLoginSuccess(true);
+        }, 1100);
+      };
+
+      return (
+        <div className="w-full max-w-md relative z-10">
+          
+          {/* 다크모드 토글 버튼 */}
+          <div className="flex justify-end mb-4">
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 rounded-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur border border-slate-200/80 dark:border-slate-700/80 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all shadow-sm"
+              title="다크 모드 전환"
+            >
+              <Icon name={darkMode ? "sun" : "moon"} className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* 메인 로그인 카드 */}
+          <div className="relative bg-white/90 dark:bg-[#0F172A]/90 backdrop-blur-xl rounded-3xl border border-slate-200/80 dark:border-slate-800/80 p-8 shadow-2xl shadow-indigo-500/10 overflow-hidden">
+            
+            {/* 상단 시그니처 그라데이션 라인 */}
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-violet-600 via-indigo-600 to-pink-500"></div>
+
+            {!loginSuccess ? (
+              <div>
+                {/* 브랜드 헤더 */}
+                <div className="text-center mb-8">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-violet-600 via-indigo-600 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/30 mx-auto mb-3.5">
+                    <Icon name="sparkles" className="w-6 h-6 text-white" />
+                  </div>
+                  <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+                    다시 오신 것을 환영해요
+                  </h1>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 font-medium">
+                    PulseFeed에 로그인하고 실시간 AI 요약을 확인하세요
+                  </p>
+                </div>
+
+                {/* 로그인 폼 */}
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  
+                  {/* 1. 이메일 입력 */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                      이메일 계정
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <Icon name="mail" className="w-4 h-4" />
+                      </div>
+                      <input
+                        type="email"
+                        name="email"
+                        required
+                        value={formData.email}
+                        onChange={handleChange}
+                        placeholder="name@example.com"
+                        className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500 transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  {/* 2. 비밀번호 입력 */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                        비밀번호
+                      </label>
+                      <a href="#" onClick={(e) => { e.preventDefault(); alert("비밀번호 재설정 링크가 이메일로 전송됩니다."); }} className="text-[11px] font-semibold text-violet-600 dark:text-violet-400 hover:underline">
+                        비밀번호 찾기
+                      </a>
+                    </div>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <Icon name="lock" className="w-4 h-4" />
+                      </div>
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        name="password"
+                        required
+                        value={formData.password}
+                        onChange={handleChange}
+                        placeholder="비밀번호 입력"
+                        className="w-full pl-10 pr-10 py-2.5 text-xs rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500 transition-all"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                      >
+                        <Icon name={showPassword ? "eyeOff" : "eye"} className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 3. 자동 로그인 체크박스 */}
+                  <div className="flex items-center pt-1">
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        name="rememberMe"
+                        checked={formData.rememberMe}
+                        onChange={handleChange}
+                        className="w-4 h-4 rounded text-violet-600 focus:ring-violet-500 dark:focus:ring-violet-400 border-slate-300 dark:border-slate-700 dark:bg-slate-800"
+                      />
+                      <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+                        로그인 상태 유지
+                      </span>
+                    </label>
+                  </div>
+
+                  {/* 로그인 제출 버튼 */}
+                  <div className="pt-2">
+                    <button
+                      type="submit"
+                      disabled={isLoading || !formData.email || !formData.password}
+                      className={`w-full py-3 rounded-xl text-xs font-extrabold text-white flex items-center justify-center gap-2 shadow-lg transition-all duration-200 ${
+                        !isLoading && formData.email && formData.password
+                          ? "bg-gradient-to-r from-violet-600 via-indigo-600 to-pink-500 shadow-indigo-500/25 hover:opacity-95 hover:shadow-indigo-500/40 active:scale-[0.99] cursor-pointer"
+                          : "bg-slate-300 dark:bg-slate-800 cursor-not-allowed opacity-60 shadow-none"
+                      }`}
+                    >
+                      {isLoading ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                          <span>인증 확인 중...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>로그인</span>
+                          <Icon name="arrowRight" className="w-3.5 h-3.5" />
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+
+                {/* 하단 회원가입 전환 링크 */}
+                <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800/80 text-center">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    아직 PulseFeed 계정이 없으신가요?{' '}
+                    <a href="SIGNUP.html" className="font-bold text-violet-600 dark:text-violet-400 hover:underline">
+                      회원가입하기
+                    </a>
+                  </p>
+                </div>
+              </div>
+            ) : (
+              /* 로그인 성공 연출 */
+              <div className="py-6 text-center animate-in fade-in zoom-in-95 duration-200">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white shadow-xl shadow-emerald-500/25 mx-auto mb-4">
+                  <Icon name="check" className="w-8 h-8" />
+                </div>
+                <h2 className="text-xl font-black text-slate-900 dark:text-white">
+                  로그인 완료!
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+                  <strong className="text-slate-900 dark:text-white">{formData.email}</strong> 님으로 인증되었습니다.<br/>
+                  잠시 후 맞춤 피드 대시보드로 이동합니다.
+                </p>
+
+                <div className="mt-6">
+                  <button
+                    onClick={() => alert("메인 피드 화면으로 이동합니다.")}
+                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-xs font-bold shadow-md shadow-indigo-500/20 hover:opacity-95 transition-all"
+                  >
+                    피드로 즉시 이동하기 →
+                  </button>
+                </div>
+              </div>
+            )}
+
+          </div>
+
+          {/* 배경 오로라 블러 글로우 */}
+          <div className="fixed top-1/4 left-1/4 w-80 h-80 bg-violet-500/15 dark:bg-violet-600/20 rounded-full blur-3xl pointer-events-none -z-10"></div>
+          <div className="fixed bottom-1/4 right-1/4 w-80 h-80 bg-pink-500/15 dark:bg-pink-600/15 rounded-full blur-3xl pointer-events-none -z-10"></div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<LoginForm />);
+  </script>
+</body>
+</html>
