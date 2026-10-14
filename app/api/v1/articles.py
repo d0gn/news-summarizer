@@ -19,7 +19,7 @@ router = APIRouter(prefix="/articles", tags=["Articles & Feeds"])
 @router.get("", response_model=List[ArticleResponse])
 async def list_articles(
     skip: int = Query(0, ge=0, description="건너뛸 개수"),
-    limit: int = Query(20, ge=1, le=100, description="조회할 개수"),
+    limit: int = Query(100, ge=1, le=1000, description="조회할 개수"),
     category: Optional[str] = Query(None, description="카테고리 필터"),
     search: Optional[str] = Query(None, description="검색어 (제목/본문)"),
     db: AsyncSession = Depends(get_db),

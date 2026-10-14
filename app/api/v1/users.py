@@ -37,6 +37,7 @@ async def add_bookmark(
     result = await db.execute(stmt)
     existing = result.scalars().first()
     if existing:
+        await db.refresh(existing, ["article"])
         return existing
 
     bookmark = UserBookmark(user_id=current_user.id, article_id=body.article_id)
@@ -143,7 +144,7 @@ async def update_preferences(
 @router.get("/feed", response_model=List[ArticleResponse])
 async def get_personalized_feed(
     skip: int = Query(0, ge=0),
-    limit: int = Query(20, ge=1, le=100),
+    limit: int = Query(100, ge=1, le=1000),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):

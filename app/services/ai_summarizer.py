@@ -78,12 +78,7 @@ class AISummarizerService:
             }
 
         except Exception as e:
-            logger.exception(f"Error during Gemini API summarization: {e}")
-            # [사용자 예외 처리 영역]: API 호출 실패 시 폴백(Fallback) 로직 커스텀
-            return {
-                "summary": "AI 요약 생성 중 오류가 발생했습니다.",
-                "tags": "오류,AI",
-                "core_message": "요약 처리 실패"
-            }
+            logger.error(f"Gemini API Error (Quota exceeded / Rate Limit / API Failure): {e}")
+            raise
 
 ai_summarizer_service = AISummarizerService()

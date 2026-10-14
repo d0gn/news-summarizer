@@ -99,11 +99,11 @@ news-summarizer/
   2. `components/Navbar.tsx`: 실시간 검색바, 다크모드 토글, 아바타 프로필 드롭다운 메뉴(관심사 설정, 계정 전환, 로그아웃) 구현.
 
 ### Phase 5: 맞춤 뉴스 피드 & 빠른보기 모달 구현 (`/feed`)
-- **목표:** AI 3줄 요약 기사 카드 그리드 및 모달 상세 보기 연동.
+- **목표:** `sample/MAIN.html` 디자인 100% 준수, 반응형 그리드, 무한 스크롤(Infinite Scroll) 및 모달 상세 보기 연동.
 - **주요 작업:**
-  1. `app/(dashboard)/feed/page.tsx`: `GET /api/v1/users/feed` 또는 `GET /api/v1/articles` 데이터를 받아와 카테고리 필터링 및 실시간 검색 구현.
-  2. `components/ArticleCard.tsx`: AI 한 줄 핵심(`core_message`), 썸네일, 태그 칩, 북마크 토글 버튼 구현.
-  3. `components/ArticleModal.tsx`: 카드 클릭 시 열리는 모달 내에서 Gemini 3줄 요약(`summary`) 및 모달 하단의 **[상세 페이지 보기 (`/articles/[id]`)]** 버튼 연동.
+  1. `app/(dashboard)/feed/page.tsx`: `GET /api/v1/users/feed` 또는 `GET /api/v1/articles` 데이터를 활용한 카테고리 필터링, 실시간 검색, 그리고 **무한 스크롤(Infinite Scroll)** 구현.
+  2. `components/ArticleCard.tsx`: `sample/` 디자인(AI 한 줄 핵심 `core_message`, 썸네일, 태그 칩, 북마크 토글 버튼) 완벽 반영 및 반응형 레이아웃 적용.
+  3. `components/ArticleModal.tsx`: 카드 클릭 시 열리는 모달 내 Gemini 3줄 요약(`summary`) 및 모달 하단의 **[상세 페이지 보기 (`/articles/[id]`)]** 버튼 연동.
 
 ### Phase 6: 이슈 클러스터, 북마크, 설정 페이지 구현
 - **목표:** 트렌딩 이슈, 스크랩 보관함, 사용자 선호도 설정 기능 완성.
@@ -125,31 +125,16 @@ news-summarizer/
 
 ---
 
-## 🐳 4. Docker Compose 통합 배포 구성
+## 🛠️ 4. 핵심 개발 고려사항 및 연동 원칙
 
-```yaml
-version: '3.8'
+1. **CORS 미들웨어 설정**:
+   - 백엔드(`app/main.py`)에 프론트엔드(`http://localhost:3000`) 도메인 및 출처에 대한 CORS 허용 설정 필수.
+2. **환경 변수 격리 (`.env`)**:
+   - 백엔드 `GEMINI_API_KEY`, DB URL 등 민감 정보 보호 및 프론트엔드 `NEXT_PUBLIC_API_URL` 설정.
+3. **초기 RSS 소스 및 기사 시드(Seed)**:
+   - 시스템 최초 구동 시 뉴스 피드에 데이터가 표시되도록 기본 RSS 소스 등록 및 초기 수집 파이프라인 트리거 확보.
+4. **로딩 스켈레톤 및 토스트(Toast) 피드백**:
+   - 네트워크 지연 및 AI 요약 호출 시 사용자 경험(UX) 향상을 위한 스켈레톤 UI 및 에러 발생 시 직관적인 토스트 알림 제공.
+5. **토큰 만료 자동 처리**:
+   - Axios Response Interceptor를 통한 `401 Unauthorized` 감지 시 인증 정보 초기화 및 로그인 페이지 리다이렉트.
 
-services:
-  backend:
-    build: .
-    container_name: news_backend
-    restart: always
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./news_summarizer.db:/app/news_summarizer.db
-    env_file:
-      - .env
-
-  frontend:
-    build: ./frontend
-    container_name: news_frontend
-    restart: always
-    ports:
-      - "3000:3000"
-    environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000
-    depends_on:
-      - backend
-```
