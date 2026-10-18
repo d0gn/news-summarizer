@@ -5,16 +5,34 @@ import { api } from "@/lib/api";
 import ArticleCard from "@/components/ArticleCard";
 import ArticleModal from "@/components/ArticleModal";
 
+interface Article {
+  id: number;
+  title: string;
+  source_name?: string;
+  publisher?: string;
+  url: string;
+  origin_url?: string;
+  published_at?: string;
+  summary?: string;
+  core_message?: string;
+  tags?: unknown;
+  category?: string;
+}
+
+interface Cluster {
+  id: number | string;
+  title: string;
+  article_count?: number;
+  articles?: Article[];
+  created_at: string;
+}
+
 export default function ClustersPage() {
-  const [clusters, setClusters] = useState<any[]>([]);
+  const [clusters, setClusters] = useState<Cluster[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedArticle, setSelectedArticle] = useState<any | null>(null);
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
 
-  useEffect(() => {
-    fetchClusters();
-  }, []);
-
-  const fetchClusters = async () => {
+  async function fetchClusters() {
     try {
       const res = await api.get("/articles/clusters");
       setClusters(res.data);
@@ -23,7 +41,12 @@ export default function ClustersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchClusters();
+  }, []);
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
@@ -76,7 +99,7 @@ export default function ClustersPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {cluster.articles?.map((article: any) => (
+                {cluster.articles?.map((article: Article) => (
                   <ArticleCard
                     key={article.id}
                     article={article}

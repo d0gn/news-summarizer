@@ -5,10 +5,24 @@ import { api } from "@/lib/api";
 import ArticleCard from "@/components/ArticleCard";
 import ArticleModal from "@/components/ArticleModal";
 
+interface Article {
+  id: number;
+  title: string;
+  source_name?: string;
+  publisher?: string;
+  url: string;
+  origin_url?: string;
+  published_at?: string;
+  summary?: string;
+  core_message?: string;
+  tags?: unknown;
+  category?: string;
+}
+
 export default function FeedPage() {
-  const [articles, setArticles] = useState<any[]>([]);
+  const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedArticle, setSelectedArticle] = useState<any | null>(null);
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [visibleCount, setVisibleCount] = useState(24);
 
@@ -32,6 +46,7 @@ export default function FeedPage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchFeed(selectedCategory);
   }, [selectedCategory, fetchFeed]);
 

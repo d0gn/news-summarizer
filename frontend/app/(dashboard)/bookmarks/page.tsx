@@ -5,16 +5,31 @@ import { api } from "@/lib/api";
 import ArticleCard from "@/components/ArticleCard";
 import ArticleModal from "@/components/ArticleModal";
 
+interface Article {
+  id: number;
+  title: string;
+  source_name?: string;
+  publisher?: string;
+  url: string;
+  origin_url?: string;
+  published_at?: string;
+  summary?: string;
+  core_message?: string;
+  tags?: unknown;
+  category?: string;
+}
+
+interface Bookmark {
+  id: number | string;
+  article: Article;
+}
+
 export default function BookmarksPage() {
-  const [bookmarks, setBookmarks] = useState<any[]>([]);
+  const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedArticle, setSelectedArticle] = useState<any | null>(null);
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
 
-  useEffect(() => {
-    fetchBookmarks();
-  }, []);
-
-  const fetchBookmarks = async () => {
+  async function fetchBookmarks() {
     try {
       const res = await api.get("/users/bookmarks");
       setBookmarks(res.data);
@@ -23,7 +38,12 @@ export default function BookmarksPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchBookmarks();
+  }, []);
 
   const handleBookmarkToggle = () => {
     // Refresh list after bookmark removal

@@ -10,11 +10,7 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
 
-  useEffect(() => {
-    fetchPreferences();
-  }, []);
-
-  const fetchPreferences = async () => {
+  async function fetchPreferences() {
     try {
       const res = await api.get("/users/preferences");
       setCategories(res.data.preferred_categories || "");
@@ -24,7 +20,12 @@ export default function SettingsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchPreferences();
+  }, []);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();

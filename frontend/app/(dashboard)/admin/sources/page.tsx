@@ -3,8 +3,16 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 
+interface Source {
+  id: number | string;
+  name: string;
+  url: string;
+  category: string;
+  is_active: boolean;
+}
+
 export default function AdminSourcesPage() {
-  const [sources, setSources] = useState<any[]>([]);
+  const [sources, setSources] = useState<Source[]>([]);
   const [loading, setLoading] = useState(true);
   const [triggering, setTriggering] = useState(false);
   const [message, setMessage] = useState("");
@@ -19,7 +27,7 @@ export default function AdminSourcesPage() {
     fetchSources();
   }, []);
 
-  const fetchSources = async () => {
+  async function fetchSources() {
     try {
       const res = await api.get("/sources");
       setSources(res.data);
@@ -28,7 +36,7 @@ export default function AdminSourcesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   const handleAddSource = async (e: React.FormEvent) => {
     e.preventDefault();

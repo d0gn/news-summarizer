@@ -5,21 +5,35 @@ import { useRouter, useParams } from "next/navigation";
 import { api } from "@/lib/api";
 import Link from "next/link";
 
+interface Article {
+  id: number | string;
+  title: string;
+  publisher?: string;
+  source_name?: string;
+  url: string;
+  origin_url?: string;
+  published_at?: string;
+  summary?: string;
+  core_message?: string;
+  content_text?: string;
+  tags?: unknown;
+  related_articles?: Array<{
+    id: string | number;
+    publisher?: string;
+    title: string;
+    origin_url?: string;
+  }>;
+}
+
 function ArticleDetailContent() {
   const router = useRouter();
   const params = useParams();
   const articleId = params?.id as string;
 
-  const [article, setArticle] = useState<any | null>(null);
+  const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (articleId) {
-      fetchDetail();
-    }
-  }, [articleId]);
-
-  const fetchDetail = async () => {
+  async function fetchDetail() {
     try {
       const res = await api.get(`/articles/${articleId}`);
       setArticle(res.data);
@@ -28,7 +42,15 @@ function ArticleDetailContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    if (articleId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      fetchDetail();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [articleId]);
 
   if (loading) {
     return (
@@ -52,13 +74,13 @@ function ArticleDetailContent() {
     );
   }
 
-  const getTagsArray = (tags: any): string[] => {
+  const getTagsArray = (tags: unknown): string[] => {
     if (!tags) return [];
-    if (Array.isArray(tags)) return tags;
+    if (Array.isArray(tags)) return tags as string[];
     if (typeof tags === "string") {
       try {
         const parsed = JSON.parse(tags);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed)) return parsed as string[];
       } catch {}
       return tags.split(",").map((t: string) => t.trim()).filter(Boolean);
     }

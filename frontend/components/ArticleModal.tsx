@@ -14,7 +14,7 @@ interface Article {
   published_at?: string;
   summary?: string;
   core_message?: string;
-  tags?: any;
+  tags?: unknown;
   category?: string;
 }
 
@@ -25,13 +25,13 @@ interface ArticleModalProps {
   onBookmark?: (id: number) => void;
 }
 
-const getTagsArray = (tags: any): string[] => {
+const getTagsArray = (tags: unknown): string[] => {
   if (!tags) return [];
-  if (Array.isArray(tags)) return tags;
+  if (Array.isArray(tags)) return tags as string[];
   if (typeof tags === "string") {
     try {
       const parsed = JSON.parse(tags);
-      if (Array.isArray(parsed)) return parsed;
+      if (Array.isArray(parsed)) return parsed as string[];
     } catch {}
     return tags.split(",").map((t) => t.trim()).filter(Boolean);
   }

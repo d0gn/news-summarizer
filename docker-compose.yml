@@ -14,11 +14,41 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000/api/v1}
     container_name: news_frontend
     restart: always
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000/api/v1}
     depends_on:
       - backend
+
+
+# services:
+#   backend:
+#     build: .
+#     container_name: news_backend
+#     restart: always
+#     ports:
+#       - "8000:8000"
+#     environment:
+#       - GEMINI_API_KEY=${GEMINI_API_KEY}
+#     volumes:
+#       - ./news_summarizer.db:/app/news_summarizer.db
+
+#   frontend:
+#     build:
+#       context: ./frontend
+#       dockerfile: Dockerfile
+#       args:
+#         - NEXT_PUBLIC_API_URL=http://변경해야함 공인 ip 주소:8000/api/v1
+#     container_name: news_frontend
+#     restart: always
+#     ports:
+#       - "3000:3000"
+#     environment:
+#       - NEXT_PUBLIC_API_URL=http://변경해야함 공인 ip 주소:8000/api/v1
+#     depends_on:
+#       - backend

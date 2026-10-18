@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
@@ -17,16 +17,15 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [darkMode, setDarkMode] = useState(false);
-
-  useEffect(() => {
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window === "undefined") return false;
     const savedTheme = localStorage.getItem("theme");
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     const dark = savedTheme === "dark" || (!savedTheme && prefersDark);
-    setDarkMode(dark);
     if (dark) document.documentElement.classList.add("dark");
     else document.documentElement.classList.remove("dark");
-  }, []);
+    return dark;
+  });
 
   const toggleDarkMode = () => {
     const nextDark = !darkMode;
@@ -75,10 +74,11 @@ export default function LoginPage() {
 
       login(access_token, userRes.data);
       router.push("/feed");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
+      const errorObj = err as { response?: { data?: { detail?: string } } };
       setErrorMessage(
-        err.response?.data?.detail || "로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요."
+        errorObj.response?.data?.detail || "로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요."
       );
       setIsLoading(false);
     }

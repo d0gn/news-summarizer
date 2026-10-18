@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
@@ -19,16 +19,15 @@ export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
-
-  useEffect(() => {
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window === "undefined") return false;
     const savedTheme = localStorage.getItem("theme");
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     const dark = savedTheme === "dark" || (!savedTheme && prefersDark);
-    setDarkMode(dark);
     if (dark) document.documentElement.classList.add("dark");
     else document.documentElement.classList.remove("dark");
-  }, []);
+    return dark;
+  });
 
   const toggleDarkMode = () => {
     const nextDark = !darkMode;
@@ -68,10 +67,11 @@ export default function SignupPage() {
 
       setIsLoading(false);
       setIsSuccess(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
+      const errorObj = err as { response?: { data?: { detail?: string } } };
       setErrorMessage(
-        err.response?.data?.detail || "회원가입에 실패했습니다. 다시 시도해주세요."
+        errorObj.response?.data?.detail || "회원가입에 실패했습니다. 다시 시도해주세요."
       );
       setIsLoading(false);
     }
