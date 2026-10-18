@@ -2,7 +2,36 @@ import pytest
 from fastapi.testclient import TestClient
 from app.main import app
 
+# 1. 프로젝트의 DB 엔진 및 Base, User 모델 import
+# (프로젝트 구조에 맞게 경로를 확인해 주세요. 예: app.core.database 또는 app.db.session)
+from app.db.session import engine  # 또는 async_engine
+from app.db.base import Base       # DeclarativeBase 객체
+import app.models                  # User 모델이 Base.metadata에 등록되도록 import
+
 client = TestClient(app)
+
+
+# 2. 테스트 시작 전 테이블 생성 픽스처 추가
+@pytest.fixture(autouse=True, scope="module")
+def setup_database():
+    # 동기 엔진인 경우:
+    # Base.metadata.create_all(bind=engine)
+    # yield
+    # Base.metadata.drop_all(bind=engine)
+
+    # 비동기 엔진(AsyncEngine / aiosqlite)을 사용하는 경우:
+    import asyncio
+    async def init_tables():
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+
+    async def drop_tables():
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.drop_all)
+
+    asyncio.run(init_tables())
+    yield
+    asyncio.run(drop_tables())
 
 
 def test_health_check():
@@ -20,7 +49,6 @@ def test_user_registration_and_login():
         "/api/v1/auth/register",
         json={"email": email, "password": password, "full_name": "Test User"},
     )
-    # If already registered in a previous run, 400 is also acceptable, but in fresh sqlite test DB it should be 201
     assert response.status_code in [201, 400]
 
     # 2. Login
