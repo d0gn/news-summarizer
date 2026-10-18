@@ -65,14 +65,13 @@ export default function LoginPage() {
 
       const { access_token } = response.data;
 
-      // Fetch current user profile
-      const userRes = await api.get("/auth/me", {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-        },
+      // Save token to store and localStorage, then redirect to feed immediately
+      login(access_token, {
+        id: 0,
+        email: formData.email,
+        is_active: true,
+        is_superuser: false,
       });
-
-      login(access_token, userRes.data);
       router.push("/feed");
     } catch (err: unknown) {
       console.error(err);

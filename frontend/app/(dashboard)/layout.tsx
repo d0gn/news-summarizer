@@ -36,17 +36,26 @@ export default function DashboardLayout({
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
 
-    const storedToken = localStorage.getItem("access_token");
-    if (storedToken) {
-      setToken(storedToken);
+    const storedToken = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+    const activeToken = token || storedToken;
+
+    if (activeToken) {
+      if (!token && storedToken) {
+        setToken(storedToken);
+      }
       api.get("/auth/me")
         .then((res) => {
           setUser(res.data);
         })
         .catch((err) => {
           console.error("Failed to fetch user profile:", err);
+          if (err.response?.status === 401) {
+            localStorage.removeItem("access_token");
+            setToken(null);
+            router.push("/login");
+          }
         });
-    } else if (!token) {
+    } else {
       router.push("/login");
     }
   }, [token, setToken, setUser, router]);
@@ -63,17 +72,15 @@ export default function DashboardLayout({
     }
   };
 
+  const hasToken = typeof window !== "undefined" && (token || localStorage.getItem("access_token"));
+
   // Prevent SSR hydration mismatch and instant navigation segment drop
-  if (!mounted) {
+  if (!mounted || !hasToken) {
     return (
       <div className="min-h-screen flex bg-slate-50 dark:bg-[#0B0F19] items-center justify-center">
         <div className="text-xs text-slate-400">로딩 중...</div>
       </div>
     );
-  }
-
-  if (!token) {
-    return null;
   }
 
   return (
