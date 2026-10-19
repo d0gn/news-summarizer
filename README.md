@@ -17,6 +17,8 @@
 
 현대 사회에서는 매일 수만 건의 뉴스가 쏟아지지만, 정작 개인에게 유익하고 깊이 있는 정보를 효율적으로 소비하기는 쉽지 않습니다. **News Summarizer SaaS**는 이러한 정보 과부하(Information Overload) 문제를 해결하기 위해 개발된 **AI 기반 뉴스 큐레이션 플랫폼**입니다.
 
+링크 바로가기 [PulseFeed](https://pulsefeed.cloud/)
+
 ### 🎯 핵심 가치 (Value Proposition)
 - **시간 절약 (Time Saving)**: Google Gemini AI의 구조화된 요약(3줄 요약, 한 줄 핵심)을 통해 긴 기사를 1분 안에 파악할 수 있습니다.
 - **이슈 중심 파악 (Issue Clustering)**: 파편화된 기사들을 동일 사건/이슈별로 묶어주는 N-gram Jaccard 클러스터링을 제공합니다.
