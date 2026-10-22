@@ -3,10 +3,11 @@ name: CI Pipeline
 on:
   push:
     branches: [ main, master, develop ]
+    paths-ignore:
+      - '**.md'
   pull_request:
     branches: [ main, master, develop ]
-  paths-ignore:
-      - '**.md'
+  
 
 jobs:
   backend-test:
