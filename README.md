@@ -18,7 +18,7 @@
 현대 사회에서는 매일 수만 건의 뉴스가 쏟아지지만, 정작 개인에게 유익하고 깊이 있는 정보를 효율적으로 소비하기는 쉽지 않습니다. **News Summarizer SaaS**는 이러한 정보 과부하(Information Overload) 문제를 해결하기 위해 개발된 **AI 기반 뉴스 큐레이션 플랫폼**입니다.
 
 ### 웹 페이지 바로가기 [PulseFeed.cloud](https://pulsefeed.cloud/)
-### 프론트엔드 아키텍쳐 바로가기 [FRONTEND_ARCHITECTURE](.\frontend\FRONTEND_ARCHITECTURE.md)
+### 프론트엔드 아키텍쳐 바로가기 [FRONTEND_ARCHITECTURE](./frontend/FRONTEND_ARCHITECTURE.md)
 ### 벡엔드 아키텍쳐 바로가기 [BACKEND_ARCHITECTURE](BACKEND_ARCHITECTURE.md)
 
 ### 🎯 핵심 가치 (Value Proposition)
