@@ -5,6 +5,8 @@ on:
     branches: [ main, master, develop ]
   pull_request:
     branches: [ main, master, develop ]
+  paths-ignore:
+      - '**.md'
 
 jobs:
   backend-test:

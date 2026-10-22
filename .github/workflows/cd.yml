@@ -3,6 +3,8 @@ name: CD Pipeline
 on:
   push:
     branches: [ main, master ]
+    paths-ignore:
+      - '**.md'
 
 jobs:
   test-and-build:

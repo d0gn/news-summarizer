@@ -17,7 +17,9 @@
 
 현대 사회에서는 매일 수만 건의 뉴스가 쏟아지지만, 정작 개인에게 유익하고 깊이 있는 정보를 효율적으로 소비하기는 쉽지 않습니다. **News Summarizer SaaS**는 이러한 정보 과부하(Information Overload) 문제를 해결하기 위해 개발된 **AI 기반 뉴스 큐레이션 플랫폼**입니다.
 
-링크 바로가기 [PulseFeed](https://pulsefeed.cloud/)
+### 웹 페이지 바로가기 [PulseFeed.cloud](https://pulsefeed.cloud/)
+### 프론트엔드 아키텍쳐 바로가기 [FRONTEND_ARCHITECTURE](frontend\FRONTEND_ARCHITECTURE.md)
+### 벡엔드 아키텍쳐 바로가기 [BACKEND_ARCHITECTURE](BACKEND_ARCHITECTURE.md)
 
 ### 🎯 핵심 가치 (Value Proposition)
 - **시간 절약 (Time Saving)**: Google Gemini AI의 구조화된 요약(3줄 요약, 한 줄 핵심)을 통해 긴 기사를 1분 안에 파악할 수 있습니다.
@@ -26,7 +28,7 @@
 
 ---
 
-## ✨ 2. 핵심 엔지니어링 포인트 (Core Engineering Highlights)
+## ✨ 2. 핵심 기능 (Core Engineering Highlights)
 
 본 프로젝트는 단순한 API 조작을 넘어, 프로덕션 환경을 고려한 아키텍처와 성능 최적화에 집중했습니다.
 
@@ -106,7 +108,7 @@ news-summarizer/
 - **`v0.4.0` (Week 4): Next.js 14+ 프론트엔드 대시보드 및 인증 연동**
   - Tailwind CSS를 활용한 반응형 UI (`/feed`, `/clusters`, `/bookmarks`, `/settings`, `/admin/sources`) 구축.
   - Zustand 기반 전역 상태 관리 및 JWT 인증 Interceptor 연동.
-- **`v0.5.0` (Week 5): Docker 컨테이너화 및 GitHub Actions CI/CD 구축** (현재 진행 중)
+- **`v0.5.0` (Week 5): Docker 컨테이너화 및 GitHub Actions CI/CD 구축**
   - 멀티스테이지 Dockerfile 작성 및 `docker-compose.yml` 통합 오케스트레이션 구성.
   - GitHub Actions 자동 테스트 및 배포 파이프라인 적용.
 
@@ -114,10 +116,22 @@ news-summarizer/
 
 ## 🛠️ 6. 설치 및 실행 방법 (Getting Started)
 
-### 방법 1: Docker Compose로 한 번에 실행하기 (추천)
-1. 환경 변수 파일(`.env`) 생성:
+### 방법 1: Docker Compose로 한 번에 실행하기
+1. 환경 변수 파일(`.env`) 생성(`.env.example`)활용:
    ```env
-   GEMINI_API_KEY=your_gemini_api_key_here
+   ## App Settings
+   #APP_ENV=
+   #PORT=
+
+   ## LLM / Gemini API Key
+   # GEMINI_API_KEY=
+
+   ## Frontend API URL (for Docker build & runtime, e.g., http://<AWS_PUBLIC_IP> or *Default localhost :8000/api/v1)
+   # NEXT_PUBLIC_API_URL=서버 주소 입력
+
+   ## ai 처리 개수
+   # MAX_ITEMS_PER_FEED=
+
    ```
 2. 도커 컴포즈 빌드 및 실행:
    ```bash

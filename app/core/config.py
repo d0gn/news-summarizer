@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite+aiosqlite:///./news_summarizer.db"
 
     # Ingestion & Scraping Settings
-    INGESTION_INTERVAL_MINUTES: int = 15
+    INGESTION_INTERVAL_MINUTES: int = 240
     INGESTION_REQUEST_TIMEOUT_SECONDS: float = 10.0
     MAX_ITEMS_PER_FEED: int = Field(default=20, description="Maximum number of items to process per feed during ingestion")
     INGESTION_USER_AGENT: str = (
