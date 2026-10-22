@@ -155,19 +155,3 @@ news-summarizer/
   npm install
   npm run dev
   ```
-
----
-
-## 🛠️ 7. 트러블슈팅 및 엔지니어링 고민 (Challenges)
-
-1. **LLM 응답 포맷 안정성 확보**:
-   - *Issue*: LLM이 마크다운 코드블록이나 불필요한 텍스트를 섞어 반환하여 JSON 파싱 에러 발생.
-   - *Solution*: Pydantic v2 모델과 Gemini API의 `response_mime_type="application/json"` 제약을 동시에 적용하여 정형화된 JSON 응답을 강제하고 예외 방어 로직 구현.
-2. **대규모 뉴스 수집 시 I/O 병목 해결**:
-   - *Issue*: 다수의 RSS 소스를 동기적으로 순회하며 수집할 때 발생하는 심각한 지연 현상.
-   - *Solution*: `asyncio.gather`를 도입해 모든 RSS 소스 파싱과 본문 추출을 비동기 병렬 처리로 전환하여 수집 속도 5배 이상 향상.
-
----
-
-## 📄 License
-This project is licensed under the MIT License.
