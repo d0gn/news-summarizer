@@ -17,9 +17,11 @@ async def scheduled_ingestion_job() -> None:
     async with async_session_factory() as db:
         try:
             summaries = await run_pipeline_all_active_sources(db)
+            await db.commit()
             total_saved = sum(s.new_articles_saved for s in summaries)
             logger.info(f"Scheduled ingestion completed. Total new articles saved: {total_saved}")
         except Exception as e:
+            await db.rollback()
             logger.error(f"Error during scheduled ingestion job: {str(e)}")
 
 
