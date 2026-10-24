@@ -1,8 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/lib/store";
 import Link from "next/link";
 
 export default function Home() {
