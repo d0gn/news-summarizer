@@ -4,7 +4,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.models.entities import FeedSource
+from app.core.security import get_current_admin
+from app.models.entities import FeedSource, User
 from app.models.schemas import (
     FeedSourceCreate,
     FeedSourceResponse,
@@ -24,9 +25,11 @@ async def list_feed_sources(db: AsyncSession = Depends(get_db)):
 
 @router.post("", response_model=FeedSourceResponse, status_code=status.HTTP_201_CREATED)
 async def create_feed_source(
-    payload: FeedSourceCreate, db: AsyncSession = Depends(get_db)
+    payload: FeedSourceCreate,
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(get_current_admin),
 ):
-    """Registers a new RSS feed source."""
+    """Registers a new RSS feed source (Admin only)."""
     # Check if URL already exists
     stmt = select(FeedSource).where(FeedSource.url == payload.url)
     existing = (await db.execute(stmt)).scalar_one_or_none()
@@ -50,9 +53,12 @@ async def create_feed_source(
 
 @router.put("/{source_id}", response_model=FeedSourceResponse)
 async def update_feed_source(
-    source_id: int, payload: FeedSourceUpdate, db: AsyncSession = Depends(get_db)
+    source_id: int,
+    payload: FeedSourceUpdate,
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(get_current_admin),
 ):
-    """Updates an existing feed source."""
+    """Updates an existing feed source (Admin only)."""
     source = await db.get(FeedSource, source_id)
     if not source:
         raise HTTPException(
@@ -70,8 +76,12 @@ async def update_feed_source(
 
 
 @router.delete("/{source_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_feed_source(source_id: int, db: AsyncSession = Depends(get_db)):
-    """Deletes a feed source."""
+async def delete_feed_source(
+    source_id: int,
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(get_current_admin),
+):
+    """Deletes a feed source (Admin only)."""
     source = await db.get(FeedSource, source_id)
     if not source:
         raise HTTPException(

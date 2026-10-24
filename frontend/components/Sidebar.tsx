@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuthStore } from "@/lib/store";
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -10,14 +11,19 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen = false, onClose = () => {} }: SidebarProps) {
   const pathname = usePathname();
+  const user = useAuthStore((state) => state.user);
 
   const navItems = [
-    { name: "맞춤 뉴스 피드", href: "/feed", icon: "📰" },
-    { name: "이슈 클러스터", href: "/clusters", icon: "🔮" },
+    { name: "실시간 뉴스 피드", href: "/feed", icon: "📰" },
+    { name: "실시간 이슈 트렌드", href: "/clusters", icon: "🔮" },
     { name: "북마크 보관함", href: "/bookmarks", icon: "🔖" },
+    { name: "뉴스 매체 설정", href: "/settings/media", icon: "📻" },
     { name: "선호도 설정", href: "/settings", icon: "⚙️" },
-    { name: "RSS 소스 관리", href: "/admin/sources", icon: "🛠️" },
   ];
+
+  if (user?.is_superuser) {
+    navItems.push({ name: "RSS 소스 관리", href: "/admin/sources", icon: "🛠️" });
+  }
 
   return (
     <>
@@ -30,7 +36,7 @@ export default function Sidebar({ isOpen = false, onClose = () => {} }: SidebarP
       )}
 
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-screen transform transition-transform duration-300 ease-in-out ${
+        className={`fixed lg:sticky lg:top-0 inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-screen transform transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
@@ -79,10 +85,10 @@ export default function Sidebar({ isOpen = false, onClose = () => {} }: SidebarP
         <div className="p-4 border-t border-slate-100 dark:border-slate-800/80">
           <div className="bg-gradient-to-br from-violet-500/10 to-indigo-500/10 dark:from-violet-500/5 dark:to-indigo-500/5 p-3.5 rounded-2xl border border-violet-500/15">
             <p className="text-[11px] font-bold text-violet-700 dark:text-violet-300">
-              💡 Pro 요약 엔진 활성화
+              💡 AI 스마트 요약
             </p>
             <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-              Gemini 2.5 플래시가 실시간으로 핵심 뉴스를 요약합니다.
+              최신 AI가 복잡한 뉴스의 핵심을 3줄로 간결하게 정리해 줍니다.
             </p>
           </div>
         </div>

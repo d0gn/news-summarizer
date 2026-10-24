@@ -35,6 +35,9 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str = Field(default="", description="Google Gemini API Key")
     GEMINI_MODEL_NAME: str = Field(default="gemini-3.5-flash-lite", description="Gemini model to use for summarization")
 
+    # Admin Settings
+    ADMIN_EMAIL: str = Field(default="zmffkr77@gmail.com", description="Admin user email")
+
 
 
 settings = Settings()

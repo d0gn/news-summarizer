@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
+from app.core.config import settings
 from app.core.security import create_access_token, get_current_user, hash_password, verify_password
 from app.models.entities import User
 from app.models.schemas import TokenResponse, UserCreate, UserResponse
@@ -34,7 +35,10 @@ async def register(user_in: UserCreate, db: AsyncSession = Depends(get_db)):
     db.add(new_user)
     await db.commit()
     await db.refresh(new_user)
-    return new_user
+    
+    resp = UserResponse.model_validate(new_user)
+    resp.is_superuser = (new_user.email == settings.ADMIN_EMAIL)
+    return resp
 
 
 @router.post("/login", response_model=TokenResponse)
@@ -60,4 +64,6 @@ async def login(
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_profile(current_user: User = Depends(get_current_user)):
     """Retrieves current authenticated user profile."""
-    return current_user
+    resp = UserResponse.model_validate(current_user)
+    resp.is_superuser = (current_user.email == settings.ADMIN_EMAIL)
+    return resp

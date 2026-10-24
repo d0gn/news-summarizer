@@ -3,7 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.models.entities import FeedSource
+from app.core.security import get_current_admin
+from app.models.entities import FeedSource, User
 from app.models.schemas import IngestionResultResponse
 from app.services.pipeline import (
     run_pipeline_all_active_sources,
@@ -15,9 +16,11 @@ router = APIRouter(prefix="/ingestion", tags=["Data Ingestion"])
 
 @router.post("/trigger", response_model=IngestionResultResponse)
 async def trigger_ingestion(
-    source_id: Optional[int] = None, db: AsyncSession = Depends(get_db)
+    source_id: Optional[int] = None,
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(get_current_admin),
 ):
-    """Triggers the data ingestion pipeline manually for all active sources or a specific source ID."""
+    """Triggers the data ingestion pipeline manually for all active sources or a specific source ID (Admin only)."""
     if source_id is not None:
         source = await db.get(FeedSource, source_id)
         if not source:

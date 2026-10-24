@@ -66,6 +66,19 @@ export default function AdminSourcesPage() {
     }
   };
 
+  const handleDeleteSource = async (id: number | string) => {
+    if (!confirm("정말 이 RSS 소스를 삭제하시겠습니까?")) return;
+    setMessage("");
+    try {
+      await api.delete(`/sources/${id}`);
+      fetchSources();
+      setMessage("RSS 소스가 성공적으로 삭제되었습니다.");
+    } catch (err) {
+      console.error(err);
+      alert("소스 삭제에 실패했습니다.");
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -118,6 +131,7 @@ export default function AdminSourcesPage() {
             onChange={(e) => setNewSource({ ...newSource, category: e.target.value })}
             className="px-4 py-2.5 text-xs rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
           >
+            <option value="전체">전체</option>
             <option value="IT/테크">IT/테크</option>
             <option value="경제">경제</option>
             <option value="정치">정치</option>
@@ -153,9 +167,17 @@ export default function AdminSourcesPage() {
                   </div>
                   <p className="text-[11px] text-slate-400 truncate max-w-md mt-0.5">{s.url}</p>
                 </div>
-                <span className={`text-[10px] font-bold px-2 py-1 rounded-lg ${s.is_active ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400' : 'bg-slate-100 text-slate-500'}`}>
-                  {s.is_active ? '활성' : '비활성'}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className={`text-[10px] font-bold px-2 py-1 rounded-lg ${s.is_active ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400' : 'bg-slate-100 text-slate-500'}`}>
+                    {s.is_active ? '활성' : '비활성'}
+                  </span>
+                  <button
+                    onClick={() => handleDeleteSource(s.id)}
+                    className="px-3 py-1 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 text-xs font-bold hover:bg-red-100 dark:hover:bg-red-900/50 transition-all"
+                  >
+                    삭제
+                  </button>
+                </div>
               </div>
             ))}
           </div>

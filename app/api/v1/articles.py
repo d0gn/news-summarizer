@@ -5,7 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.core.database import get_db
-from app.models.entities import Article, FeedSource, TopicCluster
+from app.core.security import get_current_user_optional
+from app.models.entities import Article, FeedSource, TopicCluster, User, UserPreference
 from app.models.schemas import (
     ArticleDetailResponse,
     ArticleResponse,
@@ -22,10 +23,20 @@ async def list_articles(
     limit: int = Query(100, ge=1, le=1000, description="조회할 개수"),
     category: Optional[str] = Query(None, description="카테고리 필터"),
     search: Optional[str] = Query(None, description="검색어 (제목/본문)"),
+    current_user: Optional[User] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db),
 ):
-    """Retrieves paginated list of collected articles with optional category and search filters."""
+    """Retrieves paginated list of collected articles with optional category, search, and user disabled source filters."""
     stmt = select(Article).order_by(Article.published_at.desc().nullslast(), Article.created_at.desc())
+
+    if current_user:
+        pref_stmt = select(UserPreference).where(UserPreference.user_id == current_user.id)
+        pref_res = await db.execute(pref_stmt)
+        pref = pref_res.scalars().first()
+        if pref and pref.disabled_source_ids:
+            disabled_ids = [int(sid.strip()) for sid in pref.disabled_source_ids.split(",") if sid.strip().isdigit()]
+            if disabled_ids:
+                stmt = stmt.where(Article.source_id.notin_(disabled_ids))
 
     if category:
         # Join with FeedSource to filter by category

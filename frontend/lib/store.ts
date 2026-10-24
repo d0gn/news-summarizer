@@ -13,8 +13,10 @@ interface User {
 interface AuthState {
   token: string | null;
   user: User | null;
+  searchQuery: string;
   setToken: (token: string | null) => void;
   setUser: (user: User | null) => void;
+  setSearchQuery: (query: string) => void;
   login: (token: string, user: User) => void;
   logout: () => void;
 }
@@ -22,6 +24,7 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set) => ({
   token: null,
   user: null,
+  searchQuery: "",
   setToken: (token) => {
     if (typeof window !== 'undefined') {
       if (token) {
@@ -33,6 +36,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ token });
   },
   setUser: (user) => set({ user }),
+  setSearchQuery: (searchQuery) => set({ searchQuery }),
   login: (token, user) => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('access_token', token);

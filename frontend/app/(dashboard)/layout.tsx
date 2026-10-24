@@ -17,7 +17,6 @@ export default function DashboardLayout({
   const setToken = useAuthStore((state) => state.setToken);
   const setUser = useAuthStore((state) => state.setUser);
   const [mounted, setMounted] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDark, setIsDark] = useState(() => {
     if (typeof window === "undefined") return false;
@@ -52,11 +51,8 @@ export default function DashboardLayout({
           if (err.response?.status === 401) {
             localStorage.removeItem("access_token");
             setToken(null);
-            router.push("/login");
           }
         });
-    } else {
-      router.push("/login");
     }
   }, [token, setToken, setUser, router]);
 
@@ -72,10 +68,8 @@ export default function DashboardLayout({
     }
   };
 
-  const hasToken = typeof window !== "undefined" && (token || localStorage.getItem("access_token"));
-
-  // Prevent SSR hydration mismatch and instant navigation segment drop
-  if (!mounted || !hasToken) {
+  // Prevent SSR hydration mismatch
+  if (!mounted) {
     return (
       <div className="min-h-screen flex bg-slate-50 dark:bg-[#0B0F19] items-center justify-center">
         <div className="text-xs text-slate-400">로딩 중...</div>
@@ -88,8 +82,6 @@ export default function DashboardLayout({
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex-1 flex flex-col min-w-0">
         <Navbar
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
           onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
           isDark={isDark}
           onToggleTheme={toggleTheme}

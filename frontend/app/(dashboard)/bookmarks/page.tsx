@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { useAuthStore } from "@/lib/store";
 import ArticleCard from "@/components/ArticleCard";
 import ArticleModal from "@/components/ArticleModal";
+import Link from "next/link";
 
 interface Article {
   id: number;
@@ -28,8 +30,14 @@ export default function BookmarksPage() {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const token = useAuthStore((state) => state.token);
+  const hasToken = typeof window !== "undefined" && (token || localStorage.getItem("access_token"));
 
   async function fetchBookmarks() {
+    if (!hasToken) {
+      setLoading(false);
+      return;
+    }
     try {
       const res = await api.get("/users/bookmarks");
       setBookmarks(res.data);
@@ -43,12 +51,42 @@ export default function BookmarksPage() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchBookmarks();
-  }, []);
+  }, [hasToken]);
 
   const handleBookmarkToggle = () => {
     // Refresh list after bookmark removal
     fetchBookmarks();
   };
+
+  if (!hasToken) {
+    return (
+      <div className="max-w-xl mx-auto py-16 text-center space-y-6">
+        <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-violet-600 to-indigo-600 text-white text-2xl flex items-center justify-center mx-auto shadow-lg shadow-indigo-500/25">
+          🔖
+        </div>
+        <h1 className="text-xl font-black text-slate-900 dark:text-white">
+          로그인이 필요한 서비스입니다
+        </h1>
+        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+          관심 있는 기사를 북마크하고 나만의 보관함에 저장하려면 로그인해 주세요.
+        </p>
+        <div className="flex items-center justify-center gap-3 pt-2">
+          <Link
+            href="/login"
+            className="px-6 py-3 rounded-2xl bg-violet-600 text-white text-xs font-bold shadow-md shadow-violet-500/25 hover:opacity-95 transition-all"
+          >
+            로그인하기
+          </Link>
+          <Link
+            href="/signup"
+            className="px-6 py-3 rounded-2xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
+          >
+            회원가입
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">

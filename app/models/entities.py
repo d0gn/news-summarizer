@@ -151,6 +151,7 @@ class UserPreference(Base):
     )
     preferred_categories: Mapped[Optional[str]] = mapped_column(Text, nullable=True, comment="쉼표로 구분된 선호 카테고리")
     preferred_keywords: Mapped[Optional[str]] = mapped_column(Text, nullable=True, comment="쉼표로 구분된 선호 키워드/태그")
+    disabled_source_ids: Mapped[Optional[str]] = mapped_column(Text, nullable=True, comment="쉼표로 구분된 비활성화 소스 ID 목록")
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
     )

@@ -119,6 +119,7 @@ class UserResponse(BaseModel):
     full_name: Optional[str] = None
     tier: str = "free"
     is_active: bool = True
+    is_superuser: bool = Field(False, description="관리자 여부")
     created_at: datetime
 
 
@@ -144,6 +145,7 @@ class BookmarkResponse(BaseModel):
 class UserPreferenceUpdate(BaseModel):
     preferred_categories: Optional[str] = Field(None, description="쉼표로 구분된 선호 카테고리 (예: IT,경제)")
     preferred_keywords: Optional[str] = Field(None, description="쉼표로 구분된 선호 키워드 (예: 인공지능,반도체)")
+    disabled_source_ids: Optional[str] = Field(None, description="쉼표로 구분된 비활성화 소스 ID 목록 (예: 1,3,5)")
 
 
 class UserPreferenceResponse(BaseModel):
@@ -152,4 +154,5 @@ class UserPreferenceResponse(BaseModel):
     user_id: int
     preferred_categories: Optional[str] = None
     preferred_keywords: Optional[str] = None
+    disabled_source_ids: Optional[str] = None
     updated_at: datetime

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { api } from "@/lib/api";
+import { useAuthStore } from "@/lib/store";
 import ArticleCard from "@/components/ArticleCard";
 import ArticleModal from "@/components/ArticleModal";
 
@@ -25,6 +26,7 @@ export default function FeedPage() {
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [visibleCount, setVisibleCount] = useState(24);
+  const searchQuery = useAuthStore((state) => state.searchQuery);
 
   const categories = ["all", "IT/테크", "경제", "정치", "세계", "문화"];
 
@@ -59,18 +61,32 @@ export default function FeedPage() {
     setVisibleCount((prev) => prev + 24);
   };
 
-  const displayedArticles = articles.slice(0, visibleCount);
-  const hasMore = visibleCount < articles.length;
+  const filteredArticles = articles.filter((article) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    const titleMatch = article.title?.toLowerCase().includes(q);
+    const summaryMatch = article.summary?.toLowerCase().includes(q);
+    const coreMatch = article.core_message?.toLowerCase().includes(q);
+    const tagsMatch = Array.isArray(article.tags)
+      ? article.tags.some((t) => String(t).toLowerCase().includes(q))
+      : typeof article.tags === 'string'
+        ? article.tags.toLowerCase().includes(q)
+        : false;
+    return titleMatch || summaryMatch || coreMatch || tagsMatch;
+  });
+
+  const displayedArticles = filteredArticles.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredArticles.length;
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-black text-slate-900 dark:text-white">
-            맞춤형 AI 뉴스 피드 📰
+            실시간 맞춤 뉴스 피드 📰
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Gemini AI가 실시간으로 수집·가공한 고밀도 요약 뉴스 스트림입니다.
+            최신 뉴스 기사를 AI가 핵심만 요약하여 빠르게 파악할 수 있습니다.
           </p>
         </div>
 

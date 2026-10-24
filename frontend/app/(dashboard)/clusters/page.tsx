@@ -52,10 +52,10 @@ export default function ClustersPage() {
     <div className="max-w-7xl mx-auto space-y-8">
       <div>
         <h1 className="text-xl font-black text-slate-900 dark:text-white">
-          실시간 이슈 클러스터 🔮
+          실시간 주요 이슈 트렌드 🔮
         </h1>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-          유사한 뉴스들을 AI가 자동으로 클러스터링하여 주요 이슈 트렌드를 제공합니다.
+          비슷한 소식들을 하나로 묶어 오늘의 핵심 이슈 흐름을 한눈에 파악할 수 있습니다.
         </p>
       </div>
 

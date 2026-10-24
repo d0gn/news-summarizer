@@ -107,6 +107,7 @@ async def get_preferences(
             user_id=current_user.id,
             preferred_categories=None,
             preferred_keywords=None,
+            disabled_source_ids=None,
             updated_at=current_user.created_at,
         )
     return pref
@@ -128,6 +129,7 @@ async def update_preferences(
             user_id=current_user.id,
             preferred_categories=body.preferred_categories,
             preferred_keywords=body.preferred_keywords,
+            disabled_source_ids=body.disabled_source_ids,
         )
         db.add(pref)
     else:
@@ -135,6 +137,8 @@ async def update_preferences(
             pref.preferred_categories = body.preferred_categories
         if body.preferred_keywords is not None:
             pref.preferred_keywords = body.preferred_keywords
+        if body.disabled_source_ids is not None:
+            pref.disabled_source_ids = body.disabled_source_ids
 
     await db.commit()
     await db.refresh(pref)
