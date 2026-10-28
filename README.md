@@ -97,32 +97,37 @@ news-summarizer/
 
 > 본 프로젝트는 지속적인 업데이트를 진행하고 있습니다.
 
-- **`v0.1.0` (Week 1): 프로젝트 셋업 및 코어 ETL 파이프라인 구축**
+- **`v0.1.0`: 프로젝트 셋업 및 코어 ETL 파이프라인 구축**
   - FastAPI 계층형 아키텍처 초기화 및 SQLite 비동기 세션(`aiosqlite`) 구성.
   - `httpx`와 `feedparser`를 이용한 기본 RSS 수집기 및 OpenGraph 파서 구현.
   - 10월 5일 완료
-- **`v0.2.0` (Week 2): 중복 방지 및 Gemini AI 요약 엔진 도입**
+- **`v0.2.0`: 중복 방지 및 Gemini AI 요약 엔진 도입**
   - URL 정규화 및 SHA-256 해시 생성 기반 중복 수집 필터링 추가.
   - Google Gemini API 연동 및 3줄 구조화 요약/태깅/한 핵심 추출 기능 구현.
   - 10월 11일 완료
-- **`v0.3.0` (Week 3): 이슈 클러스터링 및 사용자 개인화 API 고도화**
+- **`v0.3.0`: 이슈 클러스터링 및 사용자 개인화 API 고도화**
   - N-gram Jaccard 유사도 알고리즘 기반 동일 이슈 기사 자동 군집화(`TopicCluster`) 엔진 구현.
   - 사용자 관심 카테고리/키워드 설정(`UserPreference`) 및 맞춤형 피드 조회 API 개발.
   - 10월 15일 완료
-- **`v0.4.0` (Week 4): Next.js 14+ 프론트엔드 대시보드 및 인증 연동**
+- **`v0.4.0`: Next.js 14+ 프론트엔드 대시보드 및 인증 연동**
   - Tailwind CSS를 활용한 반응형 UI (`/feed`, `/clusters`, `/bookmarks`, `/settings`, `/admin/sources`) 구축.
   - Zustand 기반 전역 상태 관리 및 JWT 인증 Interceptor 연동.
   - 10월 19일 완료
-- **`v0.5.0` (Week 5): Docker 컨테이너화 및 GitHub Actions CI/CD 구축**
+- **`v0.5.0`: Docker 컨테이너화 및 GitHub Actions CI/CD 구축**
   - 멀티스테이지 Dockerfile 작성 및 `docker-compose.yml` 통합 오케스트레이션 구성.
   - GitHub Actions 자동 테스트 및 배포 파이프라인 적용.
   - 10월 21일 완료
-- **`v0.6.0` (Week 6): 포트폴리오 최적화 패치 (Guest Mode, Search, Admin & Media Filtering)**
+- **`v0.6.0`: 포트폴리오 최적화 패치 (Guest Mode, Search, Admin & Media Filtering)**
   - 비로그인 방문자도 즉시 AI 뉴스 피드와 이슈 트렌드를 탐색할 수 있는 **게스트 모드(Guest Mode / Public Feed)** 도입.
   - 전역 상태(Zustand) 기반 **실시간 뉴스 검색 기능** 및 데스크톱 **스티키 사이드바(Sticky Sidebar)** 구현.
   - 이메일 기반 **관리자 권한 분리** (`/admin/sources` 소스 관리 및 삭제 기능, "전체" 카테고리 지원).
   - 사용자별 **뉴스 매체 구독/차단 설정 기능**(`뉴스 매체 설정`, `disabled_source_ids`) 및 자연스러운 한국어 UX 카피라이팅 전면 개편.
   - 10월 25일 완료
+- **`v0.7.0`: 맞춤 뉴스 피드 및 사용자 선호도 관리 시스템 도입**
+  - 사용자의 선호 키워드를 기반으로 최신 뉴스를 엄선하여 보여주는 **맞춤 뉴스 피드(Custom Feed)** 기능 추가 (`/custom-feed`).
+  - 설정된 선호 카테고리/키워드를 태그 형태로 나열하고 개별 삭제 및 전체 초기화할 수 있는 **선호도 관리 UI** 구현.
+  - 백엔드 맞춤 피드 API (`GET /api/v1/users/feed`) 키워드 필터링 고도화 및 선호도 삭제 엔드포인트 (`DELETE /api/v1/users/preferences`) 추가.
+  - 10월 29일 완료
 
 ---
 
