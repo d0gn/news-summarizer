@@ -15,6 +15,7 @@ export default function Sidebar({ isOpen = false, onClose = () => {} }: SidebarP
 
   const navItems = [
     { name: "실시간 뉴스 피드", href: "/feed", icon: "📰" },
+    { name: "맞춤 뉴스 피드", href: "/custom-feed", icon: "🎯" },
     { name: "실시간 이슈 트렌드", href: "/clusters", icon: "🔮" },
     { name: "북마크 보관함", href: "/bookmarks", icon: "🔖" },
     { name: "뉴스 매체 설정", href: "/settings/media", icon: "📻" },

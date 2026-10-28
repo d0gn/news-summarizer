@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     MIN_ARTICLE_CONTENT_LENGTH: int = 150
 
     # Clustering Settings
-    TOPIC_SIMILARITY_THRESHOLD: float = 0.85
+    TOPIC_SIMILARITY_THRESHOLD: float = 0.4
     CLUSTERING_LOOKBACK_HOURS: int = 24
 
     # AI / Gemini Settings (사용자가 본인 환경에 맞게 .env에 설정하거나 아래 기본값을 수정할 수 있습니다)

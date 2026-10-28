@@ -63,3 +63,12 @@ def test_user_registration_and_login(client: TestClient):
     feed_response = client.get("/api/v1/users/feed", headers=headers)
     assert feed_response.status_code == 200
     assert isinstance(feed_response.json(), list)
+
+    # 7. Delete Preferences
+    del_pref_response = client.delete("/api/v1/users/preferences", headers=headers)
+    assert del_pref_response.status_code == 204
+
+    # 8. Verify Preferences are reset/empty
+    get_pref_after = client.get("/api/v1/users/preferences", headers=headers)
+    assert get_pref_after.status_code == 200
+    assert get_pref_after.json()["preferred_categories"] is None

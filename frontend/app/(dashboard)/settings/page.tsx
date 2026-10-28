@@ -65,6 +65,50 @@ export default function SettingsPage() {
     );
   }
 
+  const categoryList = categories.split(",").map((c) => c.trim()).filter(Boolean);
+  const keywordList = keywords.split(",").map((k) => k.trim()).filter(Boolean);
+
+  const handleRemoveCategory = async (catToRemove: string) => {
+    const updated = categoryList.filter((c) => c !== catToRemove).join(", ");
+    setCategories(updated);
+    try {
+      await api.put("/users/preferences", {
+        preferred_categories: updated,
+        preferred_keywords: keywords,
+      });
+      setSuccessMessage(`카테고리 '${catToRemove}' 삭제됨`);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleRemoveKeyword = async (kwToRemove: string) => {
+    const updated = keywordList.filter((k) => k !== kwToRemove).join(", ");
+    setKeywords(updated);
+    try {
+      await api.put("/users/preferences", {
+        preferred_categories: categories,
+        preferred_keywords: updated,
+      });
+      setSuccessMessage(`키워드 '${kwToRemove}' 삭제됨`);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    if (!confirm("모든 선호도 설정을 초기화하시겠습니까?")) return;
+    try {
+      await api.delete("/users/preferences");
+      setCategories("");
+      setKeywords("");
+      setSuccessMessage("모든 선호도 설정이 초기화되었습니다.");
+    } catch (err) {
+      console.error(err);
+      alert("초기화에 실패했습니다.");
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -85,13 +129,24 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-xl font-black text-slate-900 dark:text-white">
-          사용자 선호도 설정 ⚙️
-        </h1>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-          관심 있는 카테고리나 키워드를 설정하여 맞춤형 뉴스 피드를 고도화하세요.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-black text-slate-900 dark:text-white">
+            사용자 선호도 설정 ⚙️
+          </h1>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            관심 있는 카테고리나 키워드를 설정하고 나열된 항목을 개별 관리하세요.
+          </p>
+        </div>
+        {(categoryList.length > 0 || keywordList.length > 0) && (
+          <button
+            type="button"
+            onClick={handleDeleteAll}
+            className="px-4 py-2 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900 text-xs font-bold hover:bg-red-100 transition-all"
+          >
+            전체 초기화
+          </button>
+        )}
       </div>
 
       {loading ? (
@@ -106,26 +161,70 @@ export default function SettingsPage() {
 
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
-              선호 카테고리 (쉼표로 구분, 예: IT/테크, 경제, 스타트업)
+              선호 카테고리 (쉼표로 구분 또는 아래 태그 관리)
             </label>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {categoryList.length === 0 ? (
+                <span className="text-xs text-slate-400 italic">등록된 선호 카테고리가 없습니다.</span>
+              ) : (
+                categoryList.map((cat) => (
+                  <span
+                    key={cat}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-50 dark:bg-violet-950/50 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-900 text-xs font-bold"
+                  >
+                    {cat}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveCategory(cat)}
+                      className="w-4 h-4 rounded-full flex items-center justify-center hover:bg-violet-200 dark:hover:bg-violet-900 text-violet-500 hover:text-violet-700 transition-all"
+                      title="삭제"
+                    >
+                      ✕
+                    </button>
+                  </span>
+                ))
+              )}
+            </div>
             <input
               type="text"
               value={categories}
               onChange={(e) => setCategories(e.target.value)}
-              placeholder="IT/테크, 경제"
+              placeholder="IT/테크, 경제, 스타트업"
               className="w-full px-4 py-3 text-xs rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/40"
             />
           </div>
 
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
-              선호 키워드 (쉼표로 구분, 예: 인공지능, 반도체, 비트코인)
+              선호 키워드 (쉼표로 구분 또는 아래 태그 관리)
             </label>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {keywordList.length === 0 ? (
+                <span className="text-xs text-slate-400 italic">등록된 선호 키워드가 없습니다.</span>
+              ) : (
+                keywordList.map((kw) => (
+                  <span
+                    key={kw}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-900 text-xs font-bold"
+                  >
+                    {kw}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveKeyword(kw)}
+                      className="w-4 h-4 rounded-full flex items-center justify-center hover:bg-indigo-200 dark:hover:bg-indigo-900 text-indigo-500 hover:text-indigo-700 transition-all"
+                      title="삭제"
+                    >
+                      ✕
+                    </button>
+                  </span>
+                ))
+              )}
+            </div>
             <input
               type="text"
               value={keywords}
               onChange={(e) => setKeywords(e.target.value)}
-              placeholder="인공지능, 반도체"
+              placeholder="인공지능, 반도체, 비트코인"
               className="w-full px-4 py-3 text-xs rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/40"
             />
           </div>

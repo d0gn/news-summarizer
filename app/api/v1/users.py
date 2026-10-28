@@ -145,6 +145,21 @@ async def update_preferences(
     return pref
 
 
+@router.delete("/preferences", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_preferences(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Deletes current user's feed preferences."""
+    stmt = select(UserPreference).where(UserPreference.user_id == current_user.id)
+    result = await db.execute(stmt)
+    pref = result.scalars().first()
+    if pref:
+        await db.delete(pref)
+        await db.commit()
+    return None
+
+
 @router.get("/feed", response_model=List[ArticleResponse])
 async def get_personalized_feed(
     skip: int = Query(0, ge=0),
@@ -152,38 +167,28 @@ async def get_personalized_feed(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Retrieves personalized article feed based on user's preferred categories and keywords."""
+    """Retrieves personalized article feed based strictly on user's preferred keywords."""
     # Get user preferences
     pref_stmt = select(UserPreference).where(UserPreference.user_id == current_user.id)
     pref_res = await db.execute(pref_stmt)
     pref = pref_res.scalars().first()
 
+    if not pref or not pref.preferred_keywords:
+        return []
+
+    keywords = [k.strip() for k in pref.preferred_keywords.split(",") if k.strip()]
+    if not keywords:
+        return []
+
     stmt = select(Article).order_by(Article.published_at.desc().nullslast(), Article.created_at.desc())
 
-    if pref:
-        conditions = []
-        if pref.preferred_categories:
-            categories = [c.strip() for c in pref.preferred_categories.split(",") if c.strip()]
-            if categories:
-                # Join with source to filter by category
-                stmt = stmt.join(Article.source)
-                conditions.append(FeedSource.category.in_(categories))
+    keyword_conditions = []
+    for kw in keywords:
+        keyword_conditions.append(Article.title.ilike(f"%{kw}%"))
+        keyword_conditions.append(Article.tags.ilike(f"%{kw}%"))
+        keyword_conditions.append(Article.summary.ilike(f"%{kw}%"))
 
-        if pref.preferred_keywords:
-            keywords = [k.strip() for k in pref.preferred_keywords.split(",") if k.strip()]
-            keyword_conditions = []
-            for kw in keywords:
-                keyword_conditions.append(Article.title.ilike(f"%{kw}%"))
-                keyword_conditions.append(Article.tags.ilike(f"%{kw}%"))
-            if keyword_conditions:
-                conditions.append(or_(*keyword_conditions))
-
-        if conditions:
-            # If both category and keywords exist, filter with AND or OR. Let's use OR or combined filters.
-            # For personalized feed, matching either preferred category or keywords is user-friendly.
-            stmt = stmt.where(or_(*conditions))
-
-    stmt = stmt.offset(skip).limit(limit)
+    stmt = stmt.where(or_(*keyword_conditions)).offset(skip).limit(limit)
     result = await db.execute(stmt)
     articles = result.scalars().all()
     return articles
